@@ -15,45 +15,51 @@ def is_ace(input_list):
 def is_blackjack(input_list):
     return is_ace(input_list) and contains(input_list, 10)
 
+
 def deal_card(cards):
     return random.choice(cards)
+
+
+def adjust_for_ace(hand, total):
+    """ Adjust the value of Aces in the hand if the total is over 21 """
+    while total > 21 and 11 in hand:
+        hand[hand.index(11)] = 1  # Replace one Ace from 11 to 1
+        total -= 10
+    return total
+
 
 def play_blackjack(cards):
     if initial_choice == "y":
         print(art.logo)
         initial_numbers = random.choices(cards, k=2)
         com_initial_numbers = random.choices(cards, k=2)
-        should_continue = "y"
         user_sum = sum(initial_numbers)
         com_sum = sum(com_initial_numbers)
-        print(f'''       Your cards: {initial_numbers}, current score: {user_sum}''')
-        print(f'''       Computer's first card is {com_initial_numbers[0]}''')
+        print(f"Your cards: {initial_numbers}, current score: {user_sum}")
+        print(f"Computer's first card is {com_initial_numbers[0]}")
+
+        if is_blackjack(initial_numbers):
+            print("You have Blackjack. You Win!!!")
+            return
+        elif is_blackjack(com_initial_numbers):
+            print("Computer has Blackjack. You Lose!!!!")
+            return
+        should_continue = "y"
         while should_continue == "y":
-            if is_blackjack(com_initial_numbers) or is_blackjack(initial_numbers):
-                if is_blackjack(com_initial_numbers):
-                    print("Computer has Blackjack. You Lose!!!!")
-                    should_continue = "n"
-                elif is_blackjack(initial_numbers) and not is_blackjack(com_initial_numbers):
-                    print("You have Blackjack. You Win!!!")
-                    should_continue = "n"
-            else:
-                if user_sum > 21:
-                    if not is_ace(initial_numbers):
-                        print(f"Your total went overboard with {initial_numbers}. You lose!!!")
-                        should_continue = "n"
-                    else:
-                        if 11 in initial_numbers:
-                            initial_numbers.remove(11)
-                            initial_numbers.append(1)
-                            user_sum-=10
-                        if user_sum > 21:
-                            print(f"Your total went overboard with {initial_numbers}. You lose!!!")
-                            should_continue = "n"
-                        else:
-                            should_continue = continue_game(cards, com_initial_numbers, com_sum, initial_numbers,
-                                                            user_sum)
-                else:
-                    should_continue = continue_game(cards, com_initial_numbers, com_sum, initial_numbers, user_sum)
+            if user_sum > 21:
+                user_sum = adjust_for_ace(initial_numbers, user_sum)
+            if user_sum > 21:
+                print(f"Your total went overboard with {initial_numbers}. You lose!!!")
+                break
+            should_continue = continue_game(cards, com_initial_numbers, com_sum, initial_numbers, user_sum)
+
+        if should_continue == "n":
+            while com_sum < 17:
+                com_new_card = deal_card(cards)
+                com_initial_numbers.append(com_new_card)
+                com_sum += com_new_card
+            com_sum = adjust_for_ace(com_initial_numbers, com_sum)  # Adjust dealer's hand if needed
+            compare_result(com_initial_numbers, com_sum, initial_numbers, user_sum)
 
 
 def continue_game(cards, com_initial_numbers, com_sum, initial_numbers, user_sum):
@@ -64,12 +70,7 @@ def continue_game(cards, com_initial_numbers, com_sum, initial_numbers, user_sum
         user_sum += user_new_card
         return should_continue
     else:
-        while com_sum < 17:
-            com_new_card = deal_card(cards)
-            com_initial_numbers.append(com_new_card)
-            com_sum += com_new_card
-        return compare_result(com_initial_numbers, com_sum, initial_numbers, user_sum)
-
+        return "n"
 
 
 def compare_result(com_initial_numbers, com_sum, initial_numbers, user_sum):
