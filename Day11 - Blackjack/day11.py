@@ -33,11 +33,8 @@ def play_blackjack(cards):
         print(art.logo)
         initial_numbers = random.choices(cards, k=2)
         com_initial_numbers = random.choices(cards, k=2)
-        user_sum = sum(initial_numbers)
-        com_sum = sum(com_initial_numbers)
-        print(f"Your cards: {initial_numbers}, current score: {user_sum}")
-        print(f"Computer's first card is {com_initial_numbers[0]}")
-
+        user_sum = -1
+        com_sum = -1
         if is_blackjack(initial_numbers):
             print("You have Blackjack. You Win!!!")
             return
@@ -46,12 +43,16 @@ def play_blackjack(cards):
             return
         should_continue = "y"
         while should_continue == "y":
+            user_sum = sum(initial_numbers)
+            com_sum = sum(com_initial_numbers)
+            print(f"Your cards: {initial_numbers}, current score: {user_sum}")
+            print(f"Computer's first card is {com_initial_numbers[0]}")
             if user_sum > 21:
                 user_sum = adjust_for_ace(initial_numbers, user_sum)
             if user_sum > 21:
                 print(f"Your total went overboard with {initial_numbers}. You lose!!!")
                 break
-            should_continue = continue_game(cards, com_initial_numbers, com_sum, initial_numbers, user_sum)
+            should_continue = continue_game(cards, initial_numbers, user_sum)
 
         if should_continue == "n":
             while com_sum < 17:
@@ -62,7 +63,7 @@ def play_blackjack(cards):
             compare_result(com_initial_numbers, com_sum, initial_numbers, user_sum)
 
 
-def continue_game(cards, com_initial_numbers, com_sum, initial_numbers, user_sum):
+def continue_game(cards, initial_numbers, user_sum):
     should_continue = input('''Type 'y' to get another card, type 'n' to pass: ''').lower()
     if should_continue == "y":
         user_new_card = deal_card(cards)
@@ -74,12 +75,14 @@ def continue_game(cards, com_initial_numbers, com_sum, initial_numbers, user_sum
 
 
 def compare_result(com_initial_numbers, com_sum, initial_numbers, user_sum):
+    print(f"Your final hand: {initial_numbers}, final score: {user_sum}")
+    print(f"Computer's final hand: {com_initial_numbers}, final score: {com_sum}")
     if com_sum > 21:
         print(f"Computer has gone overboard with {com_initial_numbers}. You Win!")
         return "n"
     else:
         if com_sum > user_sum:
-            print(f"You went overboard with {initial_numbers}. You lose!!!")
+            print(f"Computer total is more than yours {com_initial_numbers}. You lose!!!")
             return "n"
         elif com_sum == user_sum:
             print(
