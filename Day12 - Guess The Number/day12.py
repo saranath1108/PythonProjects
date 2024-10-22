@@ -31,5 +31,8 @@ def guess_the_number():
             print(f"You got it! The answer was {random_number}")
             return
         number_of_choices -=1
+    if number_of_choices == 0:
+        print("You've run out of guesses, you lose.")
+
 
 guess_the_number()
